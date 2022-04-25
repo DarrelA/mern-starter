@@ -1,0 +1,27 @@
+{
+  "name": "mern-starter",
+  "version": "1.0.0",
+  "description": "A boilerplate for web applications using MERN stack",
+  "type": "module",
+  "scripts": {
+    "client": "npm start --prefix client",
+    "server": "npx nodemon server/server.js --ignore client",
+    "start": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\""
+  },
+  "author": "DarrelA",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "bcryptjs": "^2.4.3",
+    "chalk": "^5.0.1",
+    "concurrently": "^7.1.0",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "express-validator": "^6.14.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.2.11"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
