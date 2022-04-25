@@ -70,4 +70,42 @@ const logoutAll = async (req, res, next) => {
   }
 };
 
-export { register, login, logout, logoutAll };
+const updateProfile = async (req, res, next) => {
+  const updateFields = Object.keys(req.body);
+  // Dynamically fetching fields from the Mongoose model
+  const allowedUpdateFields = ['name', 'email', 'password'];
+  const isValidUpdateField = updateFields.every((updateField) =>
+    allowedUpdateFields.includes(updateField)
+  );
+
+  if (!isValidUpdateField)
+    return next(new HttpError('Invalid update field.', 400));
+
+  const user = await User.findById(req.user.userId);
+  try {
+    updateFields.forEach(
+      (updateField) => (user[updateField] = req.body[updateField])
+    );
+    await user.save();
+    res.send({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      isAdmin: user.isAdmin,
+    });
+  } catch (e) {
+    return next(new HttpError('Something went wrong!', 500));
+  }
+};
+
+const deleteProfile = async (req, res, next) => {
+  const user = await User.findById(req.user.userId);
+  try {
+    await user.remove();
+    res.json({ message: 'User is removed successfully.' });
+  } catch (e) {
+    return next(new HttpError('Something went wrong!', 500));
+  }
+};
+
+export { register, login, logout, logoutAll, updateProfile, deleteProfile };
