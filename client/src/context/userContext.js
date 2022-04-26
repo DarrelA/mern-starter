@@ -1,34 +1,37 @@
-import React, { useReducer } from 'react';
+import React, { useContext, useReducer } from 'react';
 
 const UserContext = React.createContext({
-  userId: '',
+  _id: '',
   name: '',
-  email: '',
-  password: '',
-  confirmPassword: '',
+  message: '',
   login: () => {},
+  register: () => {},
 });
 
-const initialState = { userId: '' };
+const initialState = {
+  _id: '',
+  name: '',
+  message: '',
+};
 
 const userReducer = (state, action) => {
   switch (action.type) {
     case 'LOGIN_USER_SUCCESS': {
-      const { userId, name, isAdmin, token } = action.payload;
-      return { ...state, userId, name, isAdmin, token };
+      const { _id, name, isAdmin, token } = action.payload;
+      return { ...state, _id, name, isAdmin, token, message: '' };
     }
 
     case 'LOGIN_USER_FAIL': {
-      return { ...state, message: action.payload.error };
+      return { ...state, message: action.payload.message };
     }
 
     case 'REGISTER_USER_SUCCESS': {
-      const { userId, name, isAdmin, token } = action.payload;
-      return { ...state, userId, name, isAdmin, token };
+      const { _id, name, isAdmin, token } = action.payload;
+      return { ...state, _id, name, isAdmin, token, message: '' };
     }
 
     case 'REGISTER_USER_FAIL': {
-      return { ...state, message: action.payload.error };
+      return { ...state, message: action.payload.message };
     }
 
     default:
@@ -54,12 +57,13 @@ const UserProvider = ({ children }) => {
         body: JSON.stringify({ email, password }),
       });
 
-      if (!response.ok) throw new Error('Invalid credentials.');
+      const data = await response.json();
+      const { _id, name, isAdmin, token } = data;
+      if (!response.ok) throw new Error(data.message);
 
-      const { _id, name, isAdmin, token } = await response.json();
       dispatch({
         type: 'LOGIN_USER_SUCCESS',
-        payload: { userId: _id, name, isAdmin, token },
+        payload: { _id, name, isAdmin, token },
       });
 
       addUserToLocalStorage(_id, name, isAdmin, token);
@@ -76,10 +80,13 @@ const UserProvider = ({ children }) => {
         body: JSON.stringify({ name, email, password }),
       });
 
-      const { _id, isAdmin, token } = await response.json();
+      const data = await response.json();
+      const { _id, isAdmin, token } = data;
+      if (!response.ok) throw new Error(data.message);
+
       dispatch({
         type: 'REGISTER_USER_SUCCESS',
-        payload: { userId: _id, name, isAdmin, token },
+        payload: { _id, name, isAdmin, token },
       });
 
       addUserToLocalStorage(_id, name, isAdmin, token);
@@ -88,11 +95,12 @@ const UserProvider = ({ children }) => {
     }
   };
 
-  const userContext = { userId: userState.id, login, register };
-
   return (
-    <UserContext.Provider value={userContext}>{children}</UserContext.Provider>
+    <UserContext.Provider value={{ ...userState, login, register }}>
+      {children}
+    </UserContext.Provider>
   );
 };
 
-export { UserContext as default, UserProvider };
+const useUserContext = () => useContext(UserContext);
+export { useUserContext as default, UserProvider };

@@ -1,6 +1,7 @@
-import { useContext, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import UserContext from '../context/userContext';
+import { toast } from 'react-toastify';
+import useUserContext from '../context/userContext';
 
 const initialState = {
   name: '',
@@ -10,26 +11,31 @@ const initialState = {
 };
 
 const Register = () => {
-  const userContext = useContext(UserContext);
+  const userContext = useUserContext();
   const [formData, setFormData] = useState(initialState);
   const [registerPage, showRegisterPage] = useState(false);
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (userContext._id) return navigate('/');
+    if (!!userContext.message) toast.error(userContext.message);
+  }, [userContext._id, navigate, userContext.message]);
+
   const inputHandler = (e) =>
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+    setFormData({ ...formData, [e.target.id]: e.target.value.trim() });
 
   const submitHandler = (e) => {
     e.preventDefault();
 
     if (registerPage) {
-      if (formData.password !== formData.confirmPassword) return;
+      if (formData.password.length <= 7)
+        return toast.error('Password needs to have at least 7 characters.');
+      if (formData.password !== formData.confirmPassword)
+        return toast.error('Password does not match!');
+
       userContext.register(formData);
-      navigate('/');
-    } else {
-      userContext.login(formData);
-      navigate('/');
-    }
+    } else userContext.login(formData);
   };
 
   const registerPageHandler = () => showRegisterPage((prevState) => !prevState);
