@@ -4,8 +4,6 @@ const UserContext = React.createContext({
   _id: '',
   name: '',
   message: '',
-  login: () => {},
-  register: () => {},
 });
 
 const { _id, name, token, isAdmin } = {
@@ -40,6 +38,10 @@ const userReducer = (state, action) => {
       return { ...state, message: action.payload.message };
     }
 
+    case 'LOGOUT_USER_SUCCESS': {
+      return { _id: '', name: '', token: '', message: '' };
+    }
+
     default:
       return initialState;
   }
@@ -54,6 +56,8 @@ const UserProvider = ({ children }) => {
       JSON.stringify({ _id, name, isAdmin, token })
     );
   };
+
+  const removeUserToLocalStorage = () => localStorage.removeItem('userData');
 
   const login = async ({ email, password }) => {
     try {
@@ -101,8 +105,32 @@ const UserProvider = ({ children }) => {
     }
   };
 
+  const logout = async () => {
+    removeUserToLocalStorage();
+
+    await fetch(`/api/user/logout`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    dispatch({ type: 'LOGOUT_USER_SUCCESS' });
+  };
+
+  const logoutAll = async () => {
+    removeUserToLocalStorage();
+
+    await fetch(`/api/user/logoutall`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    dispatch({ type: 'LOGOUT_USER_SUCCESS' });
+  };
+
   return (
-    <UserContext.Provider value={{ ...userState, login, register }}>
+    <UserContext.Provider
+      value={{ ...userState, login, register, logout, logoutAll }}
+    >
       {children}
     </UserContext.Provider>
   );

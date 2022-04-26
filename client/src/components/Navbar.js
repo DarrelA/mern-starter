@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import mernLogo from '../assets/images/mern-logo.jpeg';
 
 const Navbar = () => {
-  const userContext = useUserContext();
+  const { _id, logout } = useUserContext();
 
   return (
     <header className="header">
@@ -13,7 +13,7 @@ const Navbar = () => {
 
       <nav className="main-nav">
         <ul className="main-nav-list">
-          {!userContext._id && (
+          {!_id && (
             <li>
               <Link to="/register" className="main-nav-link nav-cta">
                 Login
@@ -21,10 +21,10 @@ const Navbar = () => {
             </li>
           )}
 
-          {userContext._id && (
+          {_id && (
             <>
               <li>
-                <Link to="/logout" className="main-nav-link">
+                <Link to="/" className="main-nav-link" onClick={logout}>
                   Logout
                 </Link>
               </li>
