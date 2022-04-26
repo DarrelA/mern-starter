@@ -1,5 +1,5 @@
 import Landing from './Landing.js';
 import NotFound from './NotFound';
-import Register from './Register.js';
+import RegisterLogin from './RegisterLogin.js';
 
-export { Landing, Register, NotFound };
+export { Landing, RegisterLogin, NotFound };

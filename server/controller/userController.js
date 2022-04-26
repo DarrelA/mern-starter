@@ -15,8 +15,6 @@ const register = async (req, res, next) => {
     const token = await user.generateAuthToken();
     res.status(201).send({
       _id: user._id,
-      name: user.name,
-      email: user.email,
       isAdmin: user.isAdmin,
       token,
     });
@@ -28,14 +26,13 @@ const register = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
-
+  console.log(req.body);
   try {
     const user = await User.findOne({ email });
     if (user && (await user.comparePassword(password)))
       return res.send({
         _id: user._id,
         name: user.name,
-        email: user.email,
         isAdmin: user.isAdmin,
         token: await user.generateAuthToken(),
       });

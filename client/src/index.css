@@ -86,6 +86,12 @@ html {
   color: #555;
 }
 
+.btn--small {
+  background-color: #6a513b;
+  width: 35%;
+  font-size: 1.2rem;
+}
+
 .link:link,
 .link:visited {
   display: inline-block;
@@ -143,4 +149,10 @@ html {
 
 .form input::placeholder {
   color: #aaa;
+}
+
+.form p {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
 }
