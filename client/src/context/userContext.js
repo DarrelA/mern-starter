@@ -8,9 +8,15 @@ const UserContext = React.createContext({
   register: () => {},
 });
 
+const { _id, name, token, isAdmin } = {
+  ...JSON.parse(localStorage.getItem('userData')),
+};
+
 const initialState = {
-  _id: '',
-  name: '',
+  _id: _id || '',
+  name: name || '',
+  token: token || '',
+  isAdmin: isAdmin || false,
   message: '',
 };
 
