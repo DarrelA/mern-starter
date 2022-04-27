@@ -11,6 +11,7 @@
   "author": "DarrelA",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.1122.0",
     "axios": "^0.26.1",
     "bcryptjs": "^2.4.3",
     "chalk": "^5.0.1",

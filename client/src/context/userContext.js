@@ -178,7 +178,6 @@ const UserProvider = ({ children }) => {
   };
 
   const uploadAvatar = async (imageData) => {
-    console.log(imageData);
     try {
       const response = await fetch(`/api/user/uploadavatar`, {
         method: 'POST',

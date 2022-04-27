@@ -1,5 +1,6 @@
 import HttpError from '../models/http-error.js';
 import User from '../models/userModel.js';
+import { getFileStream, uploadFile } from '../db/s3.js';
 
 const register = async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -105,8 +106,8 @@ const updateProfile = async (req, res, next) => {
 const uploadAvatar = async (req, res, next) => {
   const user = await User.findById(req.user.userId);
   try {
-    user.image = req.body.image ? req.body.image : user.image;
-    console.log(JSON.parse(JSON.stringify(req.body)));
+    const result = await uploadFile(req.file); // uploadFile to S3
+    user.avatar = `/images/${result.Key}`;
     await user.save();
     res.send({ message: 'success' });
   } catch (e) {

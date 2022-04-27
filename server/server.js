@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import connectDB from './db/connectDB.js';
+import { getFileStream } from './db/s3.js';
 import {
   errorMiddleware,
   notFoundMiddleware,
@@ -13,6 +14,13 @@ const port = process.env.PORT;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+app.get('/images/:key', (req, res) => {
+  console.log(req.params);
+  const readStream = getFileStream(req.params.key);
+  console.log(readStream);
+  readStream.pipe(res);
+});
 
 const __dirname = path.resolve();
 app.use(

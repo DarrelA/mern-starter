@@ -30,6 +30,7 @@ const Navbar = () => {
               </li>
               <li>
                 <Link to="/dashboard" className="main-nav-link nav-cta">
+                  <img src="/images/97bc27859353dc1640b6" alt="profile" />
                   Profile
                 </Link>
               </li>
