@@ -164,6 +164,7 @@ const UserProvider = ({ children }) => {
       clearAlert();
     } catch (error) {
       dispatch({ type: 'UPDATE_USER_FAIL', payload: error });
+      clearAlert();
     }
   };
 

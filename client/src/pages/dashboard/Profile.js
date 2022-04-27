@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import useUserContext from '../../context/userContext';
+import { ImageUpload } from '../../components/';
 
 const initialState = {
   name: '',
@@ -16,18 +17,16 @@ const Profile = () => {
   const [formData, setFormData] = useState(initialState);
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!userContext._id) return navigate('/');
-    if (userContext.message === 'success') return navigate('/');
-    if (!!userContext.message) toast.error(userContext.message);
-  }, [userContext._id, navigate, userContext.message]);
+  const imageData = new FormData();
+  const imageHandler = (pickedFile) => imageData.append('image', pickedFile);
 
   const inputHandler = (e) =>
     setFormData({ ...formData, [e.target.id]: e.target.value.trim() });
 
   const submitHandler = (e) => {
     e.preventDefault();
+    if (!formData.currentPassword)
+      return toast.error('Current password is required to update.');
     if (!!formData.newPassword) {
       if (formData.newPassword.length <= 7)
         return toast.error('Password needs to have at least 7 characters.');
@@ -37,6 +36,12 @@ const Profile = () => {
 
     userContext.update(formData);
   };
+
+  useEffect(() => {
+    if (!userContext._id) return navigate('/');
+    if (userContext.message === 'success') return navigate('/');
+    if (!!userContext.message) toast.error(userContext.message);
+  }, [userContext._id, navigate, userContext.message]);
 
   return (
     <section className="container center">
@@ -49,6 +54,8 @@ const Profile = () => {
 
       <form className="form" onSubmit={submitHandler}>
         <h2>Update Profile</h2>
+
+        <ImageUpload id="image" onImageInput={imageHandler} />
 
         <div>
           <label htmlFor="name">Full Name</label>
@@ -78,7 +85,6 @@ const Profile = () => {
             type="password"
             name="currentPassword"
             id="currentPassword"
-            required
             onChange={inputHandler}
           />
         </div>

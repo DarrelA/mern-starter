@@ -14,7 +14,8 @@ const authMiddleware = async (req, res, next) => {
     req.token = token;
 
     next();
-  } catch (error) {
+  } catch (e) {
+    console.log(e);
     return next(new HttpError('Please authenticate.', 401));
   }
 };

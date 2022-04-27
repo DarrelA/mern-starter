@@ -1,3 +1,4 @@
+import ImageUpload from './ImageUpload';
 import Navbar from './Navbar';
 
-export { Navbar };
+export { Navbar, ImageUpload };

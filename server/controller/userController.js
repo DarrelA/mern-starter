@@ -72,7 +72,7 @@ const updateProfile = async (req, res, next) => {
     delete req.body.currentPassword;
     const updateFields = Object.keys(req.body);
     // Dynamically fetching fields from the Mongoose model
-    const allowedUpdateFields = ['name', 'email', 'password'];
+    const allowedUpdateFields = ['image', 'name', 'email', 'password'];
     const isValidUpdateField = updateFields.every((updateField) =>
       allowedUpdateFields.includes(updateField)
     );
