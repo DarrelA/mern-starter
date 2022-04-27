@@ -14,11 +14,10 @@ const fileUploadMiddleware = multer({
   limits: 500000,
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, './backend/uploads/avatars');
+      cb(null, './server/uploads/avatars');
     },
 
     filename: (req, file, cb) => {
-      console.log(file);
       const extension = MIME_TYPE_MAP[file.mimetype];
       cb(null, generateId() + '.' + extension);
     },

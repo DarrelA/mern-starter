@@ -50,6 +50,15 @@ const userReducer = (state, action) => {
       return { ...state, message: action.payload.message };
     }
 
+    case 'UPLOAD_AVATAR_SUCCESS': {
+      const { message } = action.payload;
+      return { ...state, message };
+    }
+
+    case 'UPLOAD_AVATAR_FAIL': {
+      return { ...state, message: action.payload.message };
+    }
+
     default:
       return initialState;
   }
@@ -168,9 +177,39 @@ const UserProvider = ({ children }) => {
     }
   };
 
+  const uploadAvatar = async (imageData) => {
+    console.log(imageData);
+    try {
+      const response = await fetch(`/api/user/uploadavatar`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: imageData,
+      });
+
+      const data = await response.json();
+      const { message } = data;
+      if (!response.ok) throw new Error(data.message);
+
+      dispatch({ type: 'UPLOAD_AVATAR_SUCCESS', payload: { message } });
+
+      clearAlert();
+    } catch (error) {
+      dispatch({ type: 'UPLOAD_AVATAR_FAIL', payload: error });
+      clearAlert();
+    }
+  };
+
   return (
     <UserContext.Provider
-      value={{ ...userState, login, register, logout, logoutAll, update }}
+      value={{
+        ...userState,
+        login,
+        register,
+        logout,
+        logoutAll,
+        update,
+        uploadAvatar,
+      }}
     >
       {children}
     </UserContext.Provider>

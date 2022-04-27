@@ -6,6 +6,7 @@ import {
   logoutAll,
   register,
   updateProfile,
+  uploadAvatar,
 } from '../controller/userController.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 import fileUploadMiddleware from '../middleware/fileUploadMiddleware.js';
@@ -16,11 +17,12 @@ router.post('/register', register);
 router.post('/login', login);
 router.post('/logout', authMiddleware, logout);
 router.post('/logoutall', authMiddleware, logoutAll);
+router.post('/updateprofile', authMiddleware, updateProfile);
 router.post(
-  '/updateprofile',
+  '/uploadavatar',
   authMiddleware,
   fileUploadMiddleware.single('image'),
-  updateProfile
+  uploadAvatar
 );
 router.post('/deleteprofile', authMiddleware, deleteProfile);
 

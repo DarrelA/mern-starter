@@ -102,6 +102,19 @@ const updateProfile = async (req, res, next) => {
   } else return next(new HttpError('Invalid credentials.', 401));
 };
 
+const uploadAvatar = async (req, res, next) => {
+  const user = await User.findById(req.user.userId);
+  try {
+    user.image = req.body.image ? req.body.image : user.image;
+    console.log(JSON.parse(JSON.stringify(req.body)));
+    await user.save();
+    res.send({ message: 'success' });
+  } catch (e) {
+    console.log(e);
+    return next(new HttpError('Something went wrong!', 500));
+  }
+};
+
 const deleteProfile = async (req, res, next) => {
   const user = await User.findById(req.user.userId);
   try {
@@ -112,4 +125,12 @@ const deleteProfile = async (req, res, next) => {
   }
 };
 
-export { register, login, logout, logoutAll, updateProfile, deleteProfile };
+export {
+  register,
+  login,
+  logout,
+  logoutAll,
+  updateProfile,
+  uploadAvatar,
+  deleteProfile,
+};

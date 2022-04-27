@@ -18,7 +18,10 @@ const Profile = () => {
 
   const navigate = useNavigate();
   const imageData = new FormData();
-  const imageHandler = (pickedFile) => imageData.append('image', pickedFile);
+  const imageHandler = (pickedFile) => {
+    imageData.append('image', pickedFile);
+    userContext.uploadAvatar(imageData);
+  };
 
   const inputHandler = (e) =>
     setFormData({ ...formData, [e.target.id]: e.target.value.trim() });
