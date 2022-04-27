@@ -29,7 +29,7 @@ const Navbar = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/profile" className="main-nav-link nav-cta">
+                <Link to="/dashboard" className="main-nav-link nav-cta">
                   Profile
                 </Link>
               </li>

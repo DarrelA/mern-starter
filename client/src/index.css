@@ -92,6 +92,11 @@ html {
   font-size: 1.2rem;
 }
 
+.btn--alone {
+  align-self: center;
+  margin-bottom: 5rem;
+}
+
 .link:link,
 .link:visited {
   display: inline-block;

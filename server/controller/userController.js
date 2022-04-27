@@ -26,7 +26,6 @@ const register = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
-  console.log(req.body);
   try {
     const user = await User.findOne({ email });
     if (user && (await user.comparePassword(password)))
@@ -68,31 +67,39 @@ const logoutAll = async (req, res, next) => {
 };
 
 const updateProfile = async (req, res, next) => {
-  const updateFields = Object.keys(req.body);
-  // Dynamically fetching fields from the Mongoose model
-  const allowedUpdateFields = ['name', 'email', 'password'];
-  const isValidUpdateField = updateFields.every((updateField) =>
-    allowedUpdateFields.includes(updateField)
-  );
-
-  if (!isValidUpdateField)
-    return next(new HttpError('Invalid update field.', 400));
-
   const user = await User.findById(req.user.userId);
-  try {
-    updateFields.forEach(
-      (updateField) => (user[updateField] = req.body[updateField])
+  if (user && (await user.comparePassword(req.body.currentPassword))) {
+    delete req.body.currentPassword;
+    const updateFields = Object.keys(req.body);
+    // Dynamically fetching fields from the Mongoose model
+    const allowedUpdateFields = ['name', 'email', 'password'];
+    const isValidUpdateField = updateFields.every((updateField) =>
+      allowedUpdateFields.includes(updateField)
     );
-    await user.save();
-    res.send({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-    });
-  } catch (e) {
-    return next(new HttpError('Something went wrong!', 500));
-  }
+
+    if (!isValidUpdateField)
+      return next(new HttpError('Invalid update field.', 400));
+
+    try {
+      updateFields.forEach(
+        (updateField) =>
+          (user[updateField] = req.body[updateField]
+            ? req.body[updateField]
+            : user[updateField])
+      );
+      await user.save();
+      res.send({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        message: 'success',
+      });
+    } catch (e) {
+      console.log(e);
+      return next(new HttpError('Something went wrong!', 500));
+    }
+  } else return next(new HttpError('Invalid credentials.', 401));
 };
 
 const deleteProfile = async (req, res, next) => {
