@@ -133,6 +133,21 @@ html {
   text-align: center;
 }
 
+.form h4 {
+  width: 100%;
+  text-align: center;
+  border-bottom: 1px solid hsla(0, 0%, 33%, 0.5);
+  line-height: 0.1em;
+  margin: 10px 0 20px;
+}
+
+.form h4 span {
+  background: #eb984e;
+  padding: 0 10px;
+  color: hsla(0, 0%, 33%, 0.5);
+  font-size: 1.2rem;
+}
+
 .form label {
   display: block;
   font-size: 1.6rem;
@@ -159,6 +174,12 @@ html {
 .form p {
   display: flex;
   justify-content: space-around;
+  align-items: center;
+}
+
+.passport {
+  display: flex;
+  justify-content: center;
   align-items: center;
 }
 

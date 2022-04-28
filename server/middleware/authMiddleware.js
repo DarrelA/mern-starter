@@ -3,6 +3,7 @@ import HttpError from '../models/http-error.js';
 
 const authMiddleware = async (req, res, next) => {
   const authHeader = req.headers.authorization;
+  if (req.user) return next();
   if (!authHeader || !authHeader.startsWith('Bearer'))
     return next(new HttpError('Please authenticate.', 401));
 

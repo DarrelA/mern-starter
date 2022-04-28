@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import googleIcon from '../assets/svg/icons8-google.svg';
 import useUserContext from '../context/userContext';
 
 const initialState = {
@@ -106,6 +107,16 @@ const Register = () => {
             onClick={registerPageHandler}
           >{`${registerPage ? 'Go to Login' : 'Sign up now!'}`}</button>
         </p>
+
+        <h4>
+          <span>OR</span>
+        </h4>
+
+        <div className="passport">
+          <a href="/api/auth/google">
+            <img src={googleIcon} alt="google" />
+          </a>
+        </div>
       </form>
     </section>
   );

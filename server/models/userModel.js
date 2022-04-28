@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 
 const userSchema = mongoose.Schema(
   {
+    googleId: { type: String },
     avatar: { type: String },
     name: { type: String, trim: true, required: true },
     email: {
