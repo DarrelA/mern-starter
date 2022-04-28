@@ -23,7 +23,23 @@ const uploadFile = (file) => {
 
 const getFileStream = (fileKey) => {
   const downloadParams = { Key: fileKey, Bucket: bucketName };
-  s3.getObject(downloadParams).createReadStream();
+  return s3.getObject(downloadParams).createReadStream();
 };
 
-export { uploadFile, getFileStream };
+const deleteAvatar = async (fileKey) => {
+  const params = { Key: fileKey, Bucket: bucketName };
+  try {
+    await s3.headObject(params).promise();
+    console.log('File Found in S3');
+    try {
+      await s3.deleteObject(params).promise();
+      console.log('file deleted Successfully');
+    } catch (err) {
+      console.log('ERROR in file Deleting : ' + JSON.stringify(err));
+    }
+  } catch (err) {
+    console.log('File not Found ERROR : ' + err.code);
+  }
+};
+
+export { uploadFile, getFileStream, deleteAvatar };

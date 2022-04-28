@@ -42,7 +42,7 @@ const ImageUpload = ({ id, onImageInput }) => {
           {!previewUrl && <p>Please pick an image.</p>}
         </div>
         <button type="button" onClick={pickImageHandler}>
-          Pick an image
+          Upload an image
         </button>
       </div>
     </div>

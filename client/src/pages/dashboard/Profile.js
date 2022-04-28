@@ -19,6 +19,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const imageData = new FormData();
   const imageHandler = (pickedFile) => {
+    if (!pickedFile) return;
     imageData.append('image', pickedFile);
     userContext.uploadAvatar(imageData);
   };
@@ -41,10 +42,10 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    if (!userContext._id) return navigate('/');
+    if (!userContext.token) return navigate('/');
     if (userContext.message === 'success') return navigate('/');
     if (!!userContext.message) toast.error(userContext.message);
-  }, [userContext._id, navigate, userContext.message]);
+  }, [userContext.token, navigate, userContext.message, userContext.avatar]);
 
   return (
     <section className="container center">

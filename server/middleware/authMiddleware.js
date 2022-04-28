@@ -16,7 +16,7 @@ const authMiddleware = async (req, res, next) => {
     next();
   } catch (e) {
     console.log(e);
-    return next(new HttpError('Please authenticate.', 401));
+    return next(new HttpError('Please logout and login again.', 401));
   }
 };
 

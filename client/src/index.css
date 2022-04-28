@@ -222,6 +222,14 @@ html {
   gap: 4.8rem;
 }
 
+.main-nav-list .avatar {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: middle;
+}
+
 .main-nav-link:link,
 .main-nav-link:visited {
   display: inline-block;

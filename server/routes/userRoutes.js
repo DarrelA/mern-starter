@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   deleteProfile,
+  getAvatar,
   login,
   logout,
   logoutAll,
@@ -12,6 +13,8 @@ import authMiddleware from '../middleware/authMiddleware.js';
 import fileUploadMiddleware from '../middleware/fileUploadMiddleware.js';
 
 const router = express.Router();
+
+router.get('/images/:key', getAvatar);
 
 router.post('/register', register);
 router.post('/login', login);

@@ -1,9 +1,9 @@
-import useUserContext from '../context/userContext';
 import { Link } from 'react-router-dom';
 import mernLogo from '../assets/images/mern-logo.jpeg';
+import useUserContext from '../context/userContext';
 
 const Navbar = () => {
-  const { _id, logout } = useUserContext();
+  const { _id, avatar, logout } = useUserContext();
 
   return (
     <header className="header">
@@ -29,9 +29,21 @@ const Navbar = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/dashboard" className="main-nav-link nav-cta">
-                  <img src="/images/97bc27859353dc1640b6" alt="profile" />
-                  Profile
+                <Link
+                  to="/dashboard"
+                  className={
+                    !avatar ? 'main-nav-link nav-cta' : 'main-nav-link '
+                  }
+                >
+                  {!avatar ? (
+                    'Profile'
+                  ) : (
+                    <img
+                      className="avatar"
+                      src={`/api/user/images/${avatar}`}
+                      alt="profile"
+                    />
+                  )}
                 </Link>
               </li>
             </>

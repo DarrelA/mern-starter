@@ -1,12 +1,14 @@
 import React, { useContext, useReducer } from 'react';
 
 const UserContext = React.createContext({ _id: '', message: '' });
-const { _id, name, token, isAdmin } = {
+const { _id, avatar, name, token, isAdmin } = {
   ...JSON.parse(localStorage.getItem('userData')),
+  ...JSON.parse(localStorage.getItem('avatar')),
 };
 
 const initialState = {
   _id: _id || '',
+  avatar: avatar || '',
   name: name || '',
   token: token,
   isAdmin: isAdmin || false,
@@ -20,8 +22,8 @@ const userReducer = (state, action) => {
     }
 
     case 'LOGIN_USER_SUCCESS': {
-      const { _id, name, isAdmin, token } = action.payload;
-      return { ...state, _id, name, isAdmin, token, message: '' };
+      const { _id, avatar, name, isAdmin, token } = action.payload;
+      return { ...state, _id, avatar, name, isAdmin, token, message: '' };
     }
 
     case 'LOGIN_USER_FAIL': {
@@ -51,8 +53,8 @@ const userReducer = (state, action) => {
     }
 
     case 'UPLOAD_AVATAR_SUCCESS': {
-      const { message } = action.payload;
-      return { ...state, message };
+      const { avatar } = action.payload;
+      return { ...state, avatar };
     }
 
     case 'UPLOAD_AVATAR_FAIL': {
@@ -70,14 +72,10 @@ const UserProvider = ({ children }) => {
   const clearAlert = () =>
     setTimeout(() => dispatch({ type: 'CLEAR_STATE' }, 1000));
 
-  const addUserToLocalStorage = (_id, name, isAdmin, token) => {
-    localStorage.setItem(
-      'userData',
-      JSON.stringify({ _id, name, isAdmin, token })
-    );
+  const removeUserToLocalStorage = () => {
+    localStorage.removeItem('userData');
+    localStorage.removeItem('avatar');
   };
-
-  const removeUserToLocalStorage = () => localStorage.removeItem('userData');
 
   const login = async ({ email, password }) => {
     try {
@@ -88,15 +86,19 @@ const UserProvider = ({ children }) => {
       });
 
       const data = await response.json();
-      const { _id, name, isAdmin, token } = data;
+      const { _id, avatar, name, isAdmin, token } = data;
       if (!response.ok) throw new Error(data.message);
 
       dispatch({
         type: 'LOGIN_USER_SUCCESS',
-        payload: { _id, name, isAdmin, token },
+        payload: { _id, avatar, name, isAdmin, token },
       });
 
-      addUserToLocalStorage(_id, name, isAdmin, token);
+      localStorage.setItem(
+        'userData',
+        JSON.stringify({ _id, name, isAdmin, token })
+      );
+      localStorage.setItem('avatar', JSON.stringify({ avatar }));
     } catch (error) {
       dispatch({ type: 'LOGIN_USER_FAIL', payload: error });
     }
@@ -119,7 +121,10 @@ const UserProvider = ({ children }) => {
         payload: { _id, name, isAdmin, token },
       });
 
-      addUserToLocalStorage(_id, name, isAdmin, token);
+      localStorage.setItem(
+        'userData',
+        JSON.stringify({ _id, name, isAdmin, token })
+      );
     } catch (error) {
       dispatch({ type: 'REGISTER_USER_FAIL', payload: error });
     }
@@ -186,11 +191,12 @@ const UserProvider = ({ children }) => {
       });
 
       const data = await response.json();
-      const { message } = data;
+      const { avatar } = data;
       if (!response.ok) throw new Error(data.message);
 
-      dispatch({ type: 'UPLOAD_AVATAR_SUCCESS', payload: { message } });
+      dispatch({ type: 'UPLOAD_AVATAR_SUCCESS', payload: { avatar } });
 
+      localStorage.setItem('avatar', JSON.stringify({ avatar }));
       clearAlert();
     } catch (error) {
       dispatch({ type: 'UPLOAD_AVATAR_FAIL', payload: error });

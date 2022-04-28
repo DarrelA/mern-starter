@@ -1,6 +1,10 @@
+import fs from 'fs';
+import util from 'util';
+import { deleteAvatar, getFileStream, uploadFile } from '../db/s3.js';
 import HttpError from '../models/http-error.js';
 import User from '../models/userModel.js';
-import { getFileStream, uploadFile } from '../db/s3.js';
+
+const unlinkFile = util.promisify(fs.unlink);
 
 const register = async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -32,6 +36,7 @@ const login = async (req, res, next) => {
     if (user && (await user.comparePassword(password)))
       return res.send({
         _id: user._id,
+        avatar: user.avatar,
         name: user.name,
         isAdmin: user.isAdmin,
         token: await user.generateAuthToken(),
@@ -106,13 +111,31 @@ const updateProfile = async (req, res, next) => {
 const uploadAvatar = async (req, res, next) => {
   const user = await User.findById(req.user.userId);
   try {
+    if (!!user.avatar) {
+      const key = user.avatar;
+      const result = deleteAvatar(key);
+      console.log(result);
+    }
     const result = await uploadFile(req.file); // uploadFile to S3
-    user.avatar = `/images/${result.Key}`;
+
+    // delete file from folder once it is uploaded to s3
+    await unlinkFile(req.file.path);
+
+    user.avatar = `${result.Key}`;
     await user.save();
-    res.send({ message: 'success' });
+    res.send({ avatar: result.Key });
   } catch (e) {
     console.log(e);
     return next(new HttpError('Something went wrong!', 500));
+  }
+};
+
+const getAvatar = (req, res, next) => {
+  try {
+    const readStream = getFileStream(req.params.key);
+    readStream.pipe(res);
+  } catch (e) {
+    console.log(e);
   }
 };
 
@@ -133,5 +156,6 @@ export {
   logoutAll,
   updateProfile,
   uploadAvatar,
+  getAvatar,
   deleteProfile,
 };
