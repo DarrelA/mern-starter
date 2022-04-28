@@ -1,0 +1,11 @@
+// This file do not support ES Modules
+
+const { createProxyMiddleware } = require('http-proxy-middleware');
+module.exports = function (app) {
+  app.use(
+    ['/api', '/auth/google'],
+    createProxyMiddleware({
+      target: 'http://localhost:4000',
+    })
+  );
+};
