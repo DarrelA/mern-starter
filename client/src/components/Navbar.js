@@ -1,9 +1,15 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import mernLogo from '../assets/images/mern-logo.jpeg';
 import useUserContext from '../context/userContext';
 
 const Navbar = () => {
-  const { _id, avatar, logout } = useUserContext();
+  const { _id, avatar, logout, fetchUser } = useUserContext();
+
+  useEffect(() => {
+    const callFetchUser = async () => fetchUser();
+    callFetchUser();
+  }, [fetchUser]);
 
   return (
     <header className="header">

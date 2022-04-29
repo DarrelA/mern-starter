@@ -42,78 +42,78 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    if (!userContext.token) return navigate('/');
     if (userContext.message === 'success') return navigate('/');
     if (!!userContext.message) toast.error(userContext.message);
   }, [userContext.token, navigate, userContext.message, userContext.avatar]);
 
   return (
     <section className="container center">
-      <button
-        className="btn btn--form btn--alone"
-        onClick={userContext.logoutAll}
-      >
-        Logout from all devices
-      </button>
+      {!userContext.googleId && (
+        <button
+          className="btn btn--form btn--alone"
+          onClick={userContext.logoutAll}
+        >
+          Logout from all devices
+        </button>
+      )}
 
       <form className="form" onSubmit={submitHandler}>
         <h2>Update Profile</h2>
 
         <ImageUpload id="image" onImageInput={imageHandler} />
 
-        <div>
-          <label htmlFor="name">Full Name</label>
-          <input
-            type="text"
-            name="name"
-            id="name"
-            placeholder="Mong Kong"
-            onChange={inputHandler}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            name="email"
-            id="email"
-            placeholder="mongkong@gmail.com"
-            onChange={inputHandler}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="currentPassword">Current Password</label>
-          <input
-            type="password"
-            name="currentPassword"
-            id="currentPassword"
-            onChange={inputHandler}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="newPassword">New Password</label>
-          <input
-            type="password"
-            name="newPassword"
-            id="newPassword"
-            onChange={inputHandler}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="confirmPassword">Confirm Password</label>
-          <input
-            type="password"
-            name="confirmPassword"
-            id="confirmPassword"
-            onChange={inputHandler}
-          />
-        </div>
-
-        <button className="btn btn--form">Update</button>
+        {!userContext.googleId && (
+          <div>
+            <div>
+              <label htmlFor="name">Full Name</label>
+              <input
+                type="text"
+                name="name"
+                id="name"
+                placeholder="Mong Kong"
+                onChange={inputHandler}
+              />
+            </div>
+            <div>
+              <label htmlFor="email">Email</label>
+              <input
+                type="email"
+                name="email"
+                id="email"
+                placeholder="mongkong@gmail.com"
+                onChange={inputHandler}
+              />
+            </div>
+            <div>
+              <label htmlFor="currentPassword">Current Password</label>
+              <input
+                type="password"
+                name="currentPassword"
+                id="currentPassword"
+                onChange={inputHandler}
+              />
+            </div>
+            <div>
+              <label htmlFor="newPassword">New Password</label>
+              <input
+                type="password"
+                name="newPassword"
+                id="newPassword"
+                onChange={inputHandler}
+              />
+            </div>
+            <div>
+              <label htmlFor="confirmPassword">Confirm Password</label>
+              <input
+                type="password"
+                name="confirmPassword"
+                id="confirmPassword"
+                onChange={inputHandler}
+              />
+            </div>
+            <button className="btn btn--form">Update</button>
+          </div>
+        )}
       </form>
     </section>
   );

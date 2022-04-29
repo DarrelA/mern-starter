@@ -1,12 +1,13 @@
-import React, { useContext, useReducer } from 'react';
+import React, { useCallback, useContext, useReducer } from 'react';
 
 const UserContext = React.createContext({ _id: '', message: '' });
-const { _id, avatar, name, token, isAdmin } = {
+const { googleId, _id, avatar, name, token, isAdmin } = {
   ...JSON.parse(localStorage.getItem('userData')),
   ...JSON.parse(localStorage.getItem('avatar')),
 };
 
 const initialState = {
+  googleId: googleId || '',
   _id: _id || '',
   avatar: avatar || '',
   name: name || '',
@@ -19,6 +20,15 @@ const userReducer = (state, action) => {
   switch (action.type) {
     case 'CLEAR_STATE': {
       return { ...state, message: '' };
+    }
+
+    case 'FETCH_USER_SUCCESS': {
+      const { _id, avatar, name, isAdmin, token } = action.payload;
+      return { ...state, _id, avatar, name, isAdmin, token, message: '' };
+    }
+
+    case 'FETCH_USER_FAIL': {
+      return { ...state, message: action.payload.message };
     }
 
     case 'LOGIN_USER_SUCCESS': {
@@ -77,6 +87,32 @@ const UserProvider = ({ children }) => {
     localStorage.removeItem('avatar');
   };
 
+  const fetchUser = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/user/current`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      const { _id, avatar, name, isAdmin, googleId } = data;
+      if (!response.ok) throw new Error(data.message);
+
+      dispatch({
+        type: 'FETCH_USER_SUCCESS',
+        payload: { _id, avatar, name, isAdmin, googleId },
+      });
+
+      localStorage.setItem(
+        'userData',
+        JSON.stringify({ _id, name, isAdmin, token, googleId })
+      );
+      localStorage.setItem('avatar', JSON.stringify({ avatar }));
+    } catch (error) {}
+  }, []);
+
   const login = async ({ email, password }) => {
     try {
       const response = await fetch(`/api/user/login`, {
@@ -131,13 +167,17 @@ const UserProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    await fetch(`/api/user/logout`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    try {
+      await fetch(`/api/user/logout`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    dispatch({ type: 'LOGOUT_USER_SUCCESS' });
-    removeUserToLocalStorage();
+      dispatch({ type: 'LOGOUT_USER_SUCCESS' });
+      removeUserToLocalStorage();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const logoutAll = async () => {
@@ -208,6 +248,7 @@ const UserProvider = ({ children }) => {
     <UserContext.Provider
       value={{
         ...userState,
+        fetchUser,
         login,
         register,
         logout,

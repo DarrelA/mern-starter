@@ -6,9 +6,27 @@ import User from '../models/userModel.js';
 
 const unlinkFile = util.promisify(fs.unlink);
 
+const fetchUser = async (req, res, next) => {
+  try {
+    if (req.user) {
+      const { _id, googleId, name, isAdmin } = req.user; // From passport
+      const user = await User.findById(_id || req.user.userId); // From db
+      res.send({
+        _id: _id || user._id,
+        googleId: googleId || '',
+        name: name || user.name,
+        isAdmin: isAdmin || user.isAdmin,
+        avatar: user.avatar || '',
+      });
+    } else return next(new HttpError('User not found.', 404));
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 const register = async (req, res, next) => {
   const { name, email, password } = req.body;
-  if (!name || !email || !password)
+  if (!name || !email || password.length <= 7)
     return next(new HttpError('Please provide all values.', 404));
 
   if (await User.findOne({ email }))
@@ -44,19 +62,34 @@ const login = async (req, res, next) => {
 
     return next(new HttpError('Invalid credentials.', 401));
   } catch (e) {
+    console.log(e);
     return next(new HttpError('Something went wrong!', 401));
   }
 };
 
 const logout = async (req, res, next) => {
-  const user = await User.findById(req.user.userId);
-  try {
-    user.tokens = user.tokens.filter((token) => token.token !== req.token);
-    await user.save();
-    res.send('Logout sucessfully!');
-  } catch (e) {
-    console.log(e);
-    return next(new HttpError('Something went wrong!', 500));
+  if (req.user) {
+    try {
+      req.logOut();
+      res.status(200).clearCookie('connect.sid');
+      req.session.destroy(function (err) {
+        res.redirect('/register');
+      });
+    } catch (e) {
+      console.log(e);
+      return next(new HttpError('Something went wrong!', 500));
+    }
+  } else {
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.send('Logout sucessfully!');
+    try {
+      user.tokens = user.tokens.filter((token) => token.token !== req.token);
+      await user.save();
+      res.send('Logout sucessfully!');
+    } catch (e) {
+      console.log(e);
+      return next(new HttpError('Something went wrong!', 500));
+    }
   }
 };
 
@@ -109,7 +142,7 @@ const updateProfile = async (req, res, next) => {
 };
 
 const uploadAvatar = async (req, res, next) => {
-  const user = await User.findById(req.user.userId);
+  const user = await User.findById(req.user.userId || req.user._id);
   try {
     if (!!user.avatar) {
       const key = user.avatar;
@@ -150,6 +183,7 @@ const deleteProfile = async (req, res, next) => {
 };
 
 export {
+  fetchUser,
   register,
   login,
   logout,

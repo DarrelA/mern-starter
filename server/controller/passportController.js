@@ -1,12 +1,11 @@
 import passport from 'passport';
 
-const googleOauth20 = passport.authenticate('google', { scope: ['profile'] });
+const google = passport.authenticate('google', { scope: ['profile', 'email'] });
 
-const googleOauth20Callback = () =>
-  passport.authenticate('google', {
-    successRedirect: '/',
-    failureRedirect: '/login',
-  });
+const googleCallback = passport.authenticate('google', {
+  successRedirect: '/',
+  failureRedirect: '/register',
+});
 
 const passportLogout = (req, res) => {
   req.logout(); // passport.js
@@ -14,4 +13,4 @@ const passportLogout = (req, res) => {
   res.redirect('/');
 };
 
-export { googleOauth20, googleOauth20Callback, passportLogout };
+export { google, googleCallback, passportLogout };

@@ -14,9 +14,9 @@ const userSchema = mongoose.Schema(
       unique: true,
       required: true,
     },
-    password: { type: String, trim: true, minLength: 7, required: true },
-    isAdmin: { type: Boolean, default: false, required: true },
-    tokens: [{ token: { type: String, required: true } }],
+    password: { type: String, trim: true, minLength: 7 },
+    isAdmin: { type: Boolean, default: false },
+    tokens: [{ token: { type: String } }],
   }, // array of tokens to support login for multiple devices
   { timestamps: true }
 );
