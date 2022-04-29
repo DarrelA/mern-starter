@@ -19,9 +19,9 @@ const Register = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (userContext.token) return navigate('/');
+    if (userContext.token || userContext.googleId) return navigate('/');
     if (!!userContext.message) toast.error(userContext.message);
-  }, [userContext.token, navigate, userContext.message]);
+  }, [userContext.token, userContext.googleId, navigate, userContext.message]);
 
   const inputHandler = (e) =>
     setFormData({ ...formData, [e.target.id]: e.target.value.trim() });

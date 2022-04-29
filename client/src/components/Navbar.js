@@ -1,15 +1,21 @@
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import mernLogo from '../assets/images/mern-logo.jpeg';
 import useUserContext from '../context/userContext';
 
 const Navbar = () => {
-  const { _id, avatar, logout, fetchUser } = useUserContext();
+  const { googleId, _id, avatar, token, logout, fetchUser } = useUserContext();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const callFetchUser = async () => fetchUser();
     callFetchUser();
   }, [fetchUser]);
+
+  useEffect(() => {
+    if (!googleId && !token) navigate('/');
+  }, [googleId, token, navigate]);
 
   return (
     <header className="header">

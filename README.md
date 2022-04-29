@@ -4,10 +4,23 @@
 
 &nbsp;
 
+## Issues
+
+- logoutall does not logout because of fetchUser() in useEffect() in Navbar.js
+- Manual Refresh is needed to load the UI correctly
+- Not redirected when token is expired (Timer required)
+
 ## Features
 
 - Hash db password with bcryptjs with JWT stored in local storage for persist login
   - logoutAll button to empty the array of tokens in db
-- Change name, email or password
+- Upload avatar image to Amazon S3
+- Change name, email or password for account registered with email
+- Google OAuth
+
+## Future
+
+- Replace localstorage with refresh tokens
+- Dark mode
 
 &nbsp;

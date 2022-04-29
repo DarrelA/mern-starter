@@ -102,7 +102,7 @@ const UserProvider = ({ children }) => {
 
       dispatch({
         type: 'FETCH_USER_SUCCESS',
-        payload: { _id, avatar, name, isAdmin, googleId },
+        payload: { _id, avatar, name, isAdmin, token, googleId },
       });
 
       localStorage.setItem(
@@ -110,7 +110,7 @@ const UserProvider = ({ children }) => {
         JSON.stringify({ _id, name, isAdmin, token, googleId })
       );
       localStorage.setItem('avatar', JSON.stringify({ avatar }));
-    } catch (error) {}
+    } catch (e) {}
   }, []);
 
   const login = async ({ email, password }) => {
@@ -135,8 +135,8 @@ const UserProvider = ({ children }) => {
         JSON.stringify({ _id, name, isAdmin, token })
       );
       localStorage.setItem('avatar', JSON.stringify({ avatar }));
-    } catch (error) {
-      dispatch({ type: 'LOGIN_USER_FAIL', payload: error });
+    } catch (e) {
+      dispatch({ type: 'LOGIN_USER_FAIL', payload: e });
     }
   };
 
@@ -161,8 +161,8 @@ const UserProvider = ({ children }) => {
         'userData',
         JSON.stringify({ _id, name, isAdmin, token })
       );
-    } catch (error) {
-      dispatch({ type: 'REGISTER_USER_FAIL', payload: error });
+    } catch (e) {
+      dispatch({ type: 'REGISTER_USER_FAIL', payload: e });
     }
   };
 
@@ -175,19 +175,23 @@ const UserProvider = ({ children }) => {
 
       dispatch({ type: 'LOGOUT_USER_SUCCESS' });
       removeUserToLocalStorage();
-    } catch (error) {
-      console.log(error);
+    } catch (e) {
+      console.log(e);
     }
   };
 
   const logoutAll = async () => {
-    await fetch(`/api/user/logoutall`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    try {
+      await fetch(`/api/user/logoutall`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    dispatch({ type: 'LOGOUT_USER_SUCCESS' });
-    removeUserToLocalStorage();
+      dispatch({ type: 'LOGOUT_USER_SUCCESS' });
+      removeUserToLocalStorage();
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const update = async ({ name, email, currentPassword, newPassword }) => {
@@ -216,8 +220,8 @@ const UserProvider = ({ children }) => {
       });
 
       clearAlert();
-    } catch (error) {
-      dispatch({ type: 'UPDATE_USER_FAIL', payload: error });
+    } catch (e) {
+      dispatch({ type: 'UPDATE_USER_FAIL', payload: e });
       clearAlert();
     }
   };
@@ -238,8 +242,8 @@ const UserProvider = ({ children }) => {
 
       localStorage.setItem('avatar', JSON.stringify({ avatar }));
       clearAlert();
-    } catch (error) {
-      dispatch({ type: 'UPLOAD_AVATAR_FAIL', payload: error });
+    } catch (e) {
+      dispatch({ type: 'UPLOAD_AVATAR_FAIL', payload: e });
       clearAlert();
     }
   };
