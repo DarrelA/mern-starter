@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import useUserContext from '../../context/userContext';
 import { ImageUpload } from '../../components/';
+import useUserContext from '../../context/userContext';
 
 const initialState = {
   name: '',
@@ -14,6 +14,7 @@ const initialState = {
 
 const Profile = () => {
   const userContext = useUserContext();
+  const { googleId, token, message, avatar, logoutAll } = userContext;
   const [formData, setFormData] = useState(initialState);
 
   const navigate = useNavigate();
@@ -42,17 +43,14 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    if (userContext.message === 'success') return navigate('/');
-    if (!!userContext.message) toast.error(userContext.message);
-  }, [userContext.token, navigate, userContext.message, userContext.avatar]);
+    if (message === 'success') return navigate('/');
+    if (!!message) toast.error(message);
+  }, [googleId, token, navigate, message, avatar]);
 
   return (
     <section className="container center">
-      {!userContext.googleId && (
-        <button
-          className="btn btn--form btn--alone"
-          onClick={userContext.logoutAll}
-        >
+      {!googleId && (
+        <button className="btn btn--form btn--alone" onClick={logoutAll}>
           Logout from all devices
         </button>
       )}
@@ -62,7 +60,7 @@ const Profile = () => {
 
         <ImageUpload id="image" onImageInput={imageHandler} />
 
-        {!userContext.googleId && (
+        {!googleId && (
           <div>
             <div>
               <label htmlFor="name">Full Name</label>

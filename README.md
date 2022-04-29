@@ -7,7 +7,7 @@
 ## Issues
 
 - logoutall does not logout because of fetchUser() in useEffect() in Navbar.js
-- Manual Refresh is needed to load the UI correctly
+  - it only happens when user refresh the page before clicking logoutall
 - Not redirected when token is expired (Timer required)
 
 ## Features

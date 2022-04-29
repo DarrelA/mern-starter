@@ -23,8 +23,17 @@ const userReducer = (state, action) => {
     }
 
     case 'FETCH_USER_SUCCESS': {
-      const { _id, avatar, name, isAdmin, token } = action.payload;
-      return { ...state, _id, avatar, name, isAdmin, token, message: '' };
+      const { googleId, _id, avatar, name, isAdmin, token } = action.payload;
+      return {
+        ...state,
+        googleId,
+        _id,
+        avatar,
+        name,
+        isAdmin,
+        token,
+        message: '',
+      };
     }
 
     case 'FETCH_USER_FAIL': {
