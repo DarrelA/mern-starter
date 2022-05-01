@@ -1,7 +1,5 @@
 import jwt from 'jsonwebtoken';
 import HttpError from '../models/http-error.js';
-import chalk from 'chalk';
-import { inspect } from 'util';
 /*
 req.user is for passport
 authHeader is for jwt
@@ -21,13 +19,13 @@ const authMiddleware = async (req, res, next) => {
 
     try {
       const payload = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = { userId: payload._id };
+      req.user = { userId: payload.userId };
       req.token = token;
 
       next();
     } catch (e) {
       console.log(e);
-      return next(new HttpError('Please logout and login again.', 401));
+      return next(new HttpError('Please refresh and login again.', 401));
     }
   } else return next();
 };

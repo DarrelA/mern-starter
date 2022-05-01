@@ -1,7 +1,7 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
+import { useEffect } from 'react';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
-import { UserProvider } from './context/userContext.js';
+import useUserContext from './context/userContext';
 import {
   Landing,
   NotFound,
@@ -10,18 +10,26 @@ import {
 } from './pages/index.js';
 
 const App = () => {
+  const { passport, checkRefreshToken, fetchPassportUserData } =
+    useUserContext();
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (passport) fetchPassportUserData();
+  }, [passport, fetchPassportUserData]);
+
+  useEffect(() => {
+    if (!passport) checkRefreshToken();
+  }, [passport, checkRefreshToken]);
+
   return (
-    <UserProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/register" element={<RegisterLogin />} />
-          <Route path="/dashboard" element={<SharedLayout />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-      <ToastContainer />
-    </UserProvider>
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/register" element={<RegisterLogin />} />
+      <Route path="/dashboard" element={<SharedLayout />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 };
 

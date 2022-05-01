@@ -1,9 +1,11 @@
 import passport from 'passport';
 
-const google = passport.authenticate('google', { scope: ['profile', 'email'] });
+const googleRedirect = passport.authenticate('google', {
+  scope: ['profile', 'email'],
+});
 
 const googleCallback = passport.authenticate('google', {
-  successRedirect: '/',
+  successRedirect: '/dashboard',
   failureRedirect: '/register',
 });
 
@@ -13,4 +15,4 @@ const passportLogout = (req, res) => {
   res.redirect('/');
 };
 
-export { google, googleCallback, passportLogout };
+export { googleRedirect, googleCallback, passportLogout };

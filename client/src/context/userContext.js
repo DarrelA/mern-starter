@@ -1,19 +1,18 @@
 import React, { useCallback, useContext, useReducer } from 'react';
 
-const UserContext = React.createContext({ _id: '', message: '' });
-const { googleId, _id, avatar, name, token, isAdmin } = {
-  ...JSON.parse(localStorage.getItem('userData')),
-  ...JSON.parse(localStorage.getItem('avatar')),
-};
+const UserContext = React.createContext();
+const { passport, _id, avatar, name } =
+  JSON.parse(localStorage.getItem('userData')) || {};
 
 const initialState = {
-  googleId: googleId || '',
+  isLoading: false,
+  passport: passport || true,
   _id: _id || '',
   avatar: avatar || '',
   name: name || '',
-  token: token,
-  isAdmin: isAdmin || false,
+  isAdmin: false,
   message: '',
+  accessToken: '',
 };
 
 const userReducer = (state, action) => {
@@ -22,62 +21,71 @@ const userReducer = (state, action) => {
       return { ...state, message: '' };
     }
 
-    case 'FETCH_USER_SUCCESS': {
-      const { googleId, _id, avatar, name, isAdmin, token } = action.payload;
+    case 'REFRESH_TOKEN_SUCCESS': {
+      const { accessToken } = action.payload;
+      return { ...state, accessToken };
+    }
+
+    case 'IS_LOADING': {
+      return { ...state, isLoading: true };
+    }
+
+    case 'LOGIN_USER_SUCCESS': {
+      const { passport, _id, avatar, name, isAdmin, accessToken } =
+        action.payload;
       return {
         ...state,
-        googleId,
+        isLoading: false,
+        passport,
         _id,
         avatar,
         name,
         isAdmin,
-        token,
-        message: '',
+        accessToken,
       };
     }
 
-    case 'FETCH_USER_FAIL': {
-      return { ...state, message: action.payload.message };
-    }
-
-    case 'LOGIN_USER_SUCCESS': {
-      const { _id, avatar, name, isAdmin, token } = action.payload;
-      return { ...state, _id, avatar, name, isAdmin, token, message: '' };
-    }
-
     case 'LOGIN_USER_FAIL': {
-      return { ...state, message: action.payload.message };
+      return { ...state, isLoading: false, message: action.payload.message };
     }
 
     case 'REGISTER_USER_SUCCESS': {
-      const { _id, name, isAdmin, token } = action.payload;
-      return { ...state, _id, name, isAdmin, token, message: '' };
+      const { passport, _id, name, accessToken } = action.payload;
+      return { ...state, isLoading: false, passport, _id, name, accessToken };
     }
 
     case 'REGISTER_USER_FAIL': {
-      return { ...state, message: action.payload.message };
+      return { ...state, isLoading: false, message: action.payload.message };
     }
 
     case 'LOGOUT_USER_SUCCESS': {
-      return { _id: '', name: '', token: '', message: '' };
+      return {
+        ...state,
+        isLoading: false,
+        _id: '',
+        name: '',
+        isAdmin: '',
+        message: '',
+        accessToken: '',
+      };
     }
 
     case 'UPDATE_USER_SUCCESS': {
       const { _id, name, isAdmin, message } = action.payload;
-      return { ...state, _id, name, isAdmin, message };
+      return { ...state, isLoading: false, _id, name, isAdmin, message };
     }
 
     case 'UPDATE_USER_FAIL': {
-      return { ...state, message: action.payload.message };
+      return { ...state, isLoading: false, message: action.payload.message };
     }
 
     case 'UPLOAD_AVATAR_SUCCESS': {
       const { avatar } = action.payload;
-      return { ...state, avatar };
+      return { ...state, isLoading: false, avatar };
     }
 
     case 'UPLOAD_AVATAR_FAIL': {
-      return { ...state, message: action.payload.message };
+      return { ...state, isLoading: false, message: action.payload.message };
     }
 
     default:
@@ -89,145 +97,149 @@ const UserProvider = ({ children }) => {
   const [userState, dispatch] = useReducer(userReducer, initialState);
 
   const clearAlert = () =>
-    setTimeout(() => dispatch({ type: 'CLEAR_STATE' }, 1000));
+    setTimeout(() => dispatch({ type: 'CLEAR_STATE' }, 500));
 
-  const removeUserToLocalStorage = () => {
-    localStorage.removeItem('userData');
-    localStorage.removeItem('avatar');
+  const addUserDataToLocalStorage = async (passport, _id, avatar, name) => {
+    const userData = JSON.parse(localStorage.getItem('userData')) || {};
+    const updatedUserData = {
+      passport: passport ?? userData.passport,
+      _id: _id || userData._id,
+      avatar: avatar || userData.avatar,
+      name: name || userData.name,
+    };
+    localStorage.setItem('userData', JSON.stringify(updatedUserData));
   };
 
-  const fetchUser = useCallback(async () => {
+  const checkRefreshToken = useCallback(async () => {
     try {
-      const response = await fetch(`/api/user/current`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+      const response = await fetch(`/api/user/refresh_token`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       });
 
       const data = await response.json();
-      const { _id, avatar, name, isAdmin, googleId } = data;
+      const { accessToken } = data;
+      if (!response.ok) throw new Error(data.message);
+
+      dispatch({ type: 'REFRESH_TOKEN_SUCCESS', payload: { accessToken } });
+    } catch (e) {}
+  }, []);
+
+  const fetchPassportUserData = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/user/passport_user`, {
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+      const { passport, _id, avatar, name, isAdmin } = data;
       if (!response.ok) throw new Error(data.message);
 
       dispatch({
-        type: 'FETCH_USER_SUCCESS',
-        payload: { _id, avatar, name, isAdmin, token, googleId },
+        type: 'FETCH_PASSPORT_USER_SUCCESS',
+        payload: { passport, _id, avatar, name, isAdmin },
       });
 
-      localStorage.setItem(
-        'userData',
-        JSON.stringify({ _id, name, isAdmin, token, googleId })
-      );
-      localStorage.setItem('avatar', JSON.stringify({ avatar }));
+      addUserDataToLocalStorage(passport, _id, avatar, name, isAdmin);
+      clearAlert();
     } catch (e) {}
   }, []);
 
   const login = async ({ email, password }) => {
+    dispatch({ type: 'IS_LOADING' });
     try {
       const response = await fetch(`/api/user/login`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
-      const { _id, avatar, name, isAdmin, token } = data;
+      const { passport, _id, avatar, name, isAdmin, accessToken } = data;
       if (!response.ok) throw new Error(data.message);
 
       dispatch({
         type: 'LOGIN_USER_SUCCESS',
-        payload: { _id, avatar, name, isAdmin, token },
+        payload: { passport, _id, avatar, name, isAdmin, accessToken },
       });
 
-      localStorage.setItem(
-        'userData',
-        JSON.stringify({ _id, name, isAdmin, token })
-      );
-      localStorage.setItem('avatar', JSON.stringify({ avatar }));
+      addUserDataToLocalStorage(passport, _id, avatar, name);
+      clearAlert();
     } catch (e) {
       dispatch({ type: 'LOGIN_USER_FAIL', payload: e });
+      clearAlert();
     }
   };
 
   const register = async ({ name, email, password }) => {
+    dispatch({ type: 'IS_LOADING' });
     try {
       const response = await fetch(`/api/user/register`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
       });
 
       const data = await response.json();
-      const { _id, isAdmin, token } = data;
+      const { passport, _id, accessToken } = data;
       if (!response.ok) throw new Error(data.message);
 
       dispatch({
         type: 'REGISTER_USER_SUCCESS',
-        payload: { _id, name, isAdmin, token },
+        payload: { passport, _id, name, accessToken },
       });
 
-      localStorage.setItem(
-        'userData',
-        JSON.stringify({ _id, name, isAdmin, token })
-      );
+      addUserDataToLocalStorage(passport, _id, '', name, accessToken);
+      clearAlert();
     } catch (e) {
       dispatch({ type: 'REGISTER_USER_FAIL', payload: e });
+      clearAlert();
     }
   };
 
   const logout = async () => {
+    dispatch({ type: 'IS_LOADING' });
     try {
       await fetch(`/api/user/logout`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { credentials: 'include' },
       });
 
       dispatch({ type: 'LOGOUT_USER_SUCCESS' });
-      removeUserToLocalStorage();
+      localStorage.removeItem('userData');
+      clearAlert();
     } catch (e) {
       console.log(e);
+      clearAlert();
     }
   };
 
-  const logoutAll = async () => {
-    try {
-      await fetch(`/api/user/logoutall`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      dispatch({ type: 'LOGOUT_USER_SUCCESS' });
-      removeUserToLocalStorage();
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  const update = async ({ name, email, currentPassword, newPassword }) => {
+  const update = async ({ name, email, newPassword }, accessToken) => {
+    dispatch({ type: 'IS_LOADING' });
     try {
       const response = await fetch(`/api/user/updateprofile`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          Authorization: `Bearer ${token}`,
+          authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name,
-          email,
-          currentPassword,
-          password: newPassword,
-        }),
+        body: JSON.stringify({ name, email, password: newPassword }),
       });
 
       const data = await response.json();
-      const { _id, isAdmin, message } = data;
+      const { passport, _id, message } = data;
       if (!response.ok) throw new Error(data.message);
 
       dispatch({
         type: 'UPDATE_USER_SUCCESS',
-        payload: { _id, name, isAdmin, message },
+        payload: { _id, name, message },
       });
 
+      addUserDataToLocalStorage(passport, _id, '', name);
       clearAlert();
     } catch (e) {
       dispatch({ type: 'UPDATE_USER_FAIL', payload: e });
@@ -235,11 +247,12 @@ const UserProvider = ({ children }) => {
     }
   };
 
-  const uploadAvatar = async (imageData) => {
+  const uploadAvatar = async (imageData, accessToken) => {
+    dispatch({ type: 'IS_LOADING' });
     try {
       const response = await fetch(`/api/user/uploadavatar`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { authorization: `Bearer ${accessToken}` },
         body: imageData,
       });
 
@@ -248,8 +261,7 @@ const UserProvider = ({ children }) => {
       if (!response.ok) throw new Error(data.message);
 
       dispatch({ type: 'UPLOAD_AVATAR_SUCCESS', payload: { avatar } });
-
-      localStorage.setItem('avatar', JSON.stringify({ avatar }));
+      addUserDataToLocalStorage(avatar);
       clearAlert();
     } catch (e) {
       dispatch({ type: 'UPLOAD_AVATAR_FAIL', payload: e });
@@ -261,11 +273,11 @@ const UserProvider = ({ children }) => {
     <UserContext.Provider
       value={{
         ...userState,
-        fetchUser,
+        checkRefreshToken,
+        fetchPassportUserData,
         login,
         register,
         logout,
-        logoutAll,
         update,
         uploadAvatar,
       }}

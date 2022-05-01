@@ -13,15 +13,16 @@ const initialState = {
 
 const Register = () => {
   const userContext = useUserContext();
+  const { isLoading, _id, message } = userContext;
   const [formData, setFormData] = useState(initialState);
   const [registerPage, showRegisterPage] = useState(false);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (userContext.token || userContext.googleId) return navigate('/');
-    if (!!userContext.message) toast.error(userContext.message);
-  }, [userContext.token, userContext.googleId, navigate, userContext.message]);
+    if (!isLoading && !!_id) navigate('/');
+    if (!!message) toast.error(message);
+  }, [isLoading, _id, navigate, message]);
 
   const inputHandler = (e) =>
     setFormData({ ...formData, [e.target.id]: e.target.value.trim() });

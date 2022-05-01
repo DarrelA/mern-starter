@@ -1,11 +1,11 @@
 import express from 'express';
 import {
+  checkRefreshToken,
   deleteProfile,
-  fetchUser,
+  fetchPassportUserData,
   getAvatar,
   login,
   logout,
-  logoutAll,
   register,
   updateProfile,
   uploadAvatar,
@@ -15,13 +15,13 @@ import fileUploadMiddleware from '../middleware/fileUploadMiddleware.js';
 
 const router = express.Router();
 
-router.get('/current', authMiddleware, fetchUser);
+router.get('/passport_user', fetchPassportUserData);
 router.get('/images/:key', getAvatar);
 
 router.post('/register', register);
 router.post('/login', login);
-router.post('/logout', authMiddleware, logout);
-router.post('/logoutall', authMiddleware, logoutAll);
+router.post('/logout', logout);
+router.post('/refresh_token', checkRefreshToken);
 router.post('/updateprofile', authMiddleware, updateProfile);
 router.post(
   '/uploadavatar',
@@ -30,5 +30,15 @@ router.post(
   uploadAvatar
 );
 router.post('/deleteprofile', authMiddleware, deleteProfile);
+
+// /************ DUMMY PROTECTED ROUTE **********************
+router.post('/protected', authMiddleware, async (req, res) => {
+  try {
+    res.send({ data: 'Gained access protected data.' });
+  } catch (e) {
+    res.json(e.message);
+  }
+});
+// ***********************************************************/
 
 export default router;

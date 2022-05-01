@@ -6,21 +6,28 @@
 
 ## Issues
 
-- logoutall does not logout because of fetchUser() in useEffect() in Navbar.js
-  - it only happens when user refresh the page before clicking logoutall
-- Not redirected when token is expired (Timer required)
+- Need to manually refresh the page when logging in via Google to load data.
+- Encounter proxy issue after uploading avatar image to S3 and hitting refresh button.
 
 ## Features
 
-- Hash db password with bcryptjs with JWT stored in local storage for persist login
-  - logoutAll button to empty the array of tokens in db
+- Authentication with refresh token stored in db
 - Upload avatar image to Amazon S3
+- LocalStorage for non-sensitive data including \_id
 - Change name, email or password for account registered with email
 - Google OAuth
 
 ## Future
 
-- Replace localstorage with refresh tokens
+- protected routes on frontend
+- 2FA OTP
+- passport-facebook
+- passport-linkedin-oauth2
+- passport-github2
+- stripe api
+- paypal api
+- patreon api
 - Dark mode
+- admin dashboard to suspend user account
 
 &nbsp;

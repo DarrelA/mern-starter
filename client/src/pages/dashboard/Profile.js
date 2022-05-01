@@ -14,7 +14,7 @@ const initialState = {
 
 const Profile = () => {
   const userContext = useUserContext();
-  const { googleId, token, message, avatar, logoutAll } = userContext;
+  const { passport, accessToken, message, avatar } = userContext;
   const [formData, setFormData] = useState(initialState);
 
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ const Profile = () => {
   const imageHandler = (pickedFile) => {
     if (!pickedFile) return;
     imageData.append('image', pickedFile);
-    userContext.uploadAvatar(imageData);
+    userContext.uploadAvatar(imageData, accessToken);
   };
 
   const inputHandler = (e) =>
@@ -30,8 +30,6 @@ const Profile = () => {
 
   const submitHandler = (e) => {
     e.preventDefault();
-    if (!formData.currentPassword)
-      return toast.error('Current password is required to update.');
     if (!!formData.newPassword) {
       if (formData.newPassword.length <= 7)
         return toast.error('Password needs to have at least 7 characters.');
@@ -39,28 +37,22 @@ const Profile = () => {
         return toast.error('Password does not match!');
     }
 
-    userContext.update(formData);
+    userContext.update(formData, accessToken);
   };
 
   useEffect(() => {
     if (message === 'success') return navigate('/');
     if (!!message) toast.error(message);
-  }, [googleId, token, navigate, message, avatar]);
+  }, [navigate, message, avatar]);
 
   return (
     <section className="container center">
-      {!googleId && (
-        <button className="btn btn--form btn--alone" onClick={logoutAll}>
-          Logout from all devices
-        </button>
-      )}
-
       <form className="form" onSubmit={submitHandler}>
         <h2>Update Profile</h2>
 
         <ImageUpload id="image" onImageInput={imageHandler} />
 
-        {!googleId && (
+        {!passport && (
           <div>
             <div>
               <label htmlFor="name">Full Name</label>
@@ -79,15 +71,6 @@ const Profile = () => {
                 name="email"
                 id="email"
                 placeholder="mongkong@gmail.com"
-                onChange={inputHandler}
-              />
-            </div>
-            <div>
-              <label htmlFor="currentPassword">Current Password</label>
-              <input
-                type="password"
-                name="currentPassword"
-                id="currentPassword"
                 onChange={inputHandler}
               />
             </div>

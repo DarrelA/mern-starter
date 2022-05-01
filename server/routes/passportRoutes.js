@@ -1,14 +1,13 @@
 import express from 'express';
 import {
-  google,
   googleCallback,
+  googleRedirect,
   passportLogout,
 } from '../controller/passportController.js';
-import authMiddleware from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/google', google);
+router.get('/google', googleRedirect);
 router.get('/google/callback', googleCallback);
 router.get('/logout', passportLogout);
 

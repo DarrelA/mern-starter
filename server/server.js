@@ -1,10 +1,11 @@
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
 import session from 'express-session';
 import passport from 'passport';
 import path from 'path';
 import connectDB from './db/connectDB.js';
-import authMiddleware from './middleware/authMiddleware.js';
 import {
   errorMiddleware,
   notFoundMiddleware,
@@ -22,13 +23,17 @@ app.use(express.urlencoded({ extended: false }));
 app.use(
   session({
     secret: process.env.COOKIE_KEY,
-    cookie: { maxAge: 60000 },
     resave: false,
     saveUninitialized: true,
+    cookie: { secure: false }, // Set true for https connections
   })
 );
+
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use(cookieParser());
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 
 app.use('/api/auth', passportRoutes);
 app.use('/api/user', userRoutes);

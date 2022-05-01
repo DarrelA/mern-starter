@@ -30,10 +30,10 @@ const deleteAvatar = async (fileKey) => {
   const params = { Key: fileKey, Bucket: bucketName };
   try {
     await s3.headObject(params).promise();
-    console.log('File Found in S3');
+    console.log('File found in S3');
     try {
       await s3.deleteObject(params).promise();
-      console.log('file deleted Successfully');
+      console.log('File deleted from S3 successfully');
     } catch (err) {
       console.log('ERROR in file Deleting : ' + JSON.stringify(err));
     }
