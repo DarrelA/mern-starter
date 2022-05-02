@@ -16,8 +16,8 @@ const App = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (passport) fetchPassportUserData();
-  }, [passport, fetchPassportUserData]);
+    fetchPassportUserData();
+  }, [fetchPassportUserData]);
 
   useEffect(() => {
     if (!passport) checkRefreshToken();

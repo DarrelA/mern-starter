@@ -86,7 +86,6 @@ const checkRefreshToken = async (req, res, next) => {
   try {
     const payload = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
     const user = await User.findById(payload.userId);
-    const { googleId, _id, name, avatar, isAdmin } = user;
 
     if (!user || user.refreshToken !== token)
       return next(new HttpError('Please authenticate', 401));
@@ -98,7 +97,7 @@ const checkRefreshToken = async (req, res, next) => {
     await user.save();
     user.sendRefreshToken(res, refreshToken);
 
-    return res.send({ googleId, _id, avatar, name, isAdmin, accessToken });
+    return res.send({ accessToken });
   } catch (e) {
     console.log(e);
     res.send({ accessToken: '' });
@@ -108,11 +107,11 @@ const checkRefreshToken = async (req, res, next) => {
 const fetchPassportUserData = async (req, res, next) => {
   try {
     if (req.user) {
-      const { _id, googleId, name, isAdmin } = req.user; // From passport
+      const { _id, name, isAdmin } = req.user; // From passport
       const user = await User.findById(_id || req.user.userId); // From db
       res.send({
         _id: _id || user._id,
-        passport: !!googleId || false,
+        passport: true,
         name: name || user.name,
         isAdmin: isAdmin || user.isAdmin,
         avatar: user.avatar || '',

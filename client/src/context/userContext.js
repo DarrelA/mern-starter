@@ -6,7 +6,7 @@ const { passport, _id, avatar, name } =
 
 const initialState = {
   isLoading: false,
-  passport: passport || true,
+  passport: passport,
   _id: _id || '',
   avatar: avatar || '',
   name: name || '',
@@ -17,8 +17,12 @@ const initialState = {
 
 const userReducer = (state, action) => {
   switch (action.type) {
-    case 'CLEAR_STATE': {
+    case 'CLEAR_MESSAGE': {
       return { ...state, message: '' };
+    }
+
+    case 'IS_LOADING': {
+      return { ...state, isLoading: true };
     }
 
     case 'REFRESH_TOKEN_SUCCESS': {
@@ -26,8 +30,9 @@ const userReducer = (state, action) => {
       return { ...state, accessToken };
     }
 
-    case 'IS_LOADING': {
-      return { ...state, isLoading: true };
+    case 'FETCH_PASSPORT_USER_SUCCESS': {
+      const { passport, _id, avatar, name, isAdmin } = action.payload;
+      return { ...state, passport, _id, avatar, name, isAdmin };
     }
 
     case 'LOGIN_USER_SUCCESS': {
@@ -62,9 +67,11 @@ const userReducer = (state, action) => {
       return {
         ...state,
         isLoading: false,
+        passport: true,
         _id: '',
+        avatar: '',
         name: '',
-        isAdmin: '',
+        isAdmin: false,
         message: '',
         accessToken: '',
       };
@@ -97,7 +104,7 @@ const UserProvider = ({ children }) => {
   const [userState, dispatch] = useReducer(userReducer, initialState);
 
   const clearAlert = () =>
-    setTimeout(() => dispatch({ type: 'CLEAR_STATE' }, 500));
+    setTimeout(() => dispatch({ type: 'CLEAR_MESSAGE' }, 500));
 
   const addUserDataToLocalStorage = async (passport, _id, avatar, name) => {
     const userData = JSON.parse(localStorage.getItem('userData')) || {};
@@ -261,7 +268,7 @@ const UserProvider = ({ children }) => {
       if (!response.ok) throw new Error(data.message);
 
       dispatch({ type: 'UPLOAD_AVATAR_SUCCESS', payload: { avatar } });
-      addUserDataToLocalStorage(avatar);
+      addUserDataToLocalStorage('', '', avatar, '');
       clearAlert();
     } catch (e) {
       dispatch({ type: 'UPLOAD_AVATAR_FAIL', payload: e });
