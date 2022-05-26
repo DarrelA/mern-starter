@@ -12,8 +12,7 @@ const register = async (req, res, next) => {
   if (!name || !email || password.length <= 7)
     return next(new HttpError('Please provide all values.', 404));
 
-  if (await User.findOne({ email }))
-    return next(new HttpError('Email is taken.', 400));
+  if (await User.findOne({ email })) return next(new HttpError('Email is taken.', 400));
 
   try {
     const user = await User.create({ name, email, password });
@@ -23,9 +22,7 @@ const register = async (req, res, next) => {
     user.refreshToken = refreshToken;
     await user.save();
     user.sendRefreshToken(res, refreshToken);
-    return res
-      .status(201)
-      .send({ passport: false, _id: user._id, accessToken });
+    return res.status(201).send({ passport: false, _id: user._id, accessToken });
   } catch (e) {
     console.log(e);
     return next(new HttpError('Failed to register.', 400));
@@ -36,11 +33,10 @@ const login = async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
-    const { _id, avatar, name, isAdmin } = user;
-    const { googleId } = user;
+    const { _id, avatar, name, isAdmin } = user || {};
+    const { googleId } = user || {};
 
-    if (googleId)
-      return next(new HttpError('Please login using google button,', 404));
+    if (googleId) return next(new HttpError('Please login using google button,', 404));
     else if (user && (await user.comparePassword(password))) {
       const accessToken = user.createAccessToken(user._id);
       const refreshToken = user.createRefreshToken(user._id);
@@ -131,8 +127,7 @@ const updateProfile = async (req, res, next) => {
     allowedUpdateFields.includes(updateField)
   );
 
-  if (!isValidUpdateField)
-    return next(new HttpError('Invalid update field.', 400));
+  if (!isValidUpdateField) return next(new HttpError('Invalid update field.', 400));
 
   try {
     updateFields.forEach(
